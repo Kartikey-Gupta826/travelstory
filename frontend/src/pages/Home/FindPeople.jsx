@@ -7,7 +7,6 @@ import FriendsBox from "../../components/Sidebar/FriendsBox";
 import NotificationsPanel from "../../components/Notifications/NotificationsPanel";
 import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import ADD_STORY_IMG from "../../assets/images/add-story.svg";
 
 const FindPeople = () => {
   const navigate = useNavigate();
@@ -139,7 +138,7 @@ const FindPeople = () => {
               </div>
             ) : (
               <EmptyCard
-                imgSrc={ADD_STORY_IMG}
+                imgSrc="/assets/images/add-story.svg"
                 message={
                   searchQuery
                     ? "No people found matching your search."
