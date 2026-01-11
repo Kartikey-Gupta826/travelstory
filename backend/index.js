@@ -26,7 +26,7 @@ mongoose.connect(process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "https://travelstory-nine.vercel.app" }));
 
 // Create Account
 app.post("/create-account", async (req, res) => {
