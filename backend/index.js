@@ -1,13 +1,5 @@
 require("dotenv").config();
 
-// const fs = require("fs");
-// const path = require("path");
-
-// const uploadDir = path.join(__dirname, "uploads");
-// if (!fs.existsSync(uploadDir)) {
-//   fs.mkdirSync(uploadDir);
-// }
-
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const express = require("express");
@@ -133,13 +125,6 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
         .json({ error: true, message: "No image uploaded" });
     }
 
-    //   // const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
-    //   const imageUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
-
-    //   res.status(200).json({ imageUrl });
-    // } catch (error) {
-    //   res.status(500).json({ error: true, message: error.message });
-    // }
     const result = await imagekit.upload({
       file: req.file.buffer,        // multer memory storage
       fileName: req.file.originalname,
@@ -155,40 +140,7 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
   }
 });
 
-// // Delete an image from uploads folder
-// app.delete("/delete-image", async (req, res) => {
-//   const { imageUrl } = req.query;
-
-//   if (!imageUrl) {
-//     return res
-//       .status(400)
-//       .json({ error: true, message: "imageUrl parameter is required" });
-//   }
-
-//   try {
-//     // Extract the filename from the imageUrl
-//     const filename = path.basename(imageUrl);
-
-//     // Define the file path
-//     const filePath = path.join(__dirname, "uploads", filename);
-
-//     // Check if the file exists
-//     if (fs.existsSync(filePath)) {
-//       // Delete the file from the uploads folder
-//       fs.unlinkSync(filePath);
-//       res.status(200).json({ message: "Image deleted successfully" });
-//     } else {
-//       res.status(200).json({ error: true, message: "Image not found" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: true, message: error.message });
-//   }
-// });
-
-// // Serve static files from the uploads and assets directory
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// app.use("/assets", express.static(path.join(__dirname, "assets")));
-
+// Route to handle image deletion
 app.delete("/delete-image", authenticateToken, async (req, res) => {
   const { imageFileId } = req.query;
 
@@ -321,22 +273,6 @@ app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
 
     // Delete the travel story from the database
     await travelStory.deleteOne({ _id: id, userId: userId });
-
-    // Extract the filename from the imageUrl
-    // const imageUrl = travelStory.imageUrl;
-    // const filename = path.basename(imageUrl);
-
-    // // Define the file path
-    // const filePath = path.join(__dirname, "uploads", filename);
-
-    // // Delete the image file from the uploads folder
-    // fs.unlink(filePath, (err) => {
-    //   if (err) {
-    //     console.error("Failed to delete image file:", err);
-    //     // Optionally, you could still respond with a success status here
-    //     // if you don't want to treat this as a critical error.
-    //   }
-    // });
 
     res.status(200).json({ message: "Travel story deleted successfully" });
   } catch (error) {
