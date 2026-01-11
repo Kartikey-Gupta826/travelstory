@@ -54,15 +54,15 @@ frontend/
 ⚙️ Environment Variables :
 
 Backend (Render)
-    MONGO_URI
-    ACCESS_TOKEN_SECRET
-    IMAGEKIT_PUBLIC_KEY
-    IMAGEKIT_PRIVATE_KEY
-    IMAGEKIT_URL_ENDPOINT
-    BASE_URL
+    $ MONGO_URI
+    $ ACCESS_TOKEN_SECRET
+    $ IMAGEKIT_PUBLIC_KEY
+    $ IMAGEKIT_PRIVATE_KEY
+    $ IMAGEKIT_URL_ENDPOINT
+    $ BASE_URL
 
 Frontend (Vercel)
-    VITE_API_BASE_URL
+    $ VITE_API_BASE_URL
 
 ▶ Run Locally
 Backend
