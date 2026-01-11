@@ -23,6 +23,8 @@ const Group = require("./models/group.model");
 const Notification = require("./models/notification.model");
 const Announcement = require("./models/announcement.model");
 
+const imagekit = require("./imagekit");
+
 mongoose.connect(process.env.MONGO_URI);
 
 const app = express();
@@ -131,48 +133,60 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
         .json({ error: true, message: "No image uploaded" });
     }
 
-    // const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
-    const imageUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+    //   // const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+    //   const imageUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
 
-    res.status(200).json({ imageUrl });
+    //   res.status(200).json({ imageUrl });
+    // } catch (error) {
+    //   res.status(500).json({ error: true, message: error.message });
+    // }
+    const result = await imagekit.upload({
+      file: req.file.buffer,        // multer memory storage
+      fileName: req.file.originalname,
+      folder: "/travelstory",
+    });
+
+    res.status(200).json({
+      imageUrl: result.url,
+    });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Delete an image from uploads folder
-app.delete("/delete-image", async (req, res) => {
-  const { imageUrl } = req.query;
+// // Delete an image from uploads folder
+// app.delete("/delete-image", async (req, res) => {
+//   const { imageUrl } = req.query;
 
-  if (!imageUrl) {
-    return res
-      .status(400)
-      .json({ error: true, message: "imageUrl parameter is required" });
-  }
+//   if (!imageUrl) {
+//     return res
+//       .status(400)
+//       .json({ error: true, message: "imageUrl parameter is required" });
+//   }
 
-  try {
-    // Extract the filename from the imageUrl
-    const filename = path.basename(imageUrl);
+//   try {
+//     // Extract the filename from the imageUrl
+//     const filename = path.basename(imageUrl);
 
-    // Define the file path
-    const filePath = path.join(__dirname, "uploads", filename);
+//     // Define the file path
+//     const filePath = path.join(__dirname, "uploads", filename);
 
-    // Check if the file exists
-    if (fs.existsSync(filePath)) {
-      // Delete the file from the uploads folder
-      fs.unlinkSync(filePath);
-      res.status(200).json({ message: "Image deleted successfully" });
-    } else {
-      res.status(200).json({ error: true, message: "Image not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: true, message: error.message });
-  }
-});
+//     // Check if the file exists
+//     if (fs.existsSync(filePath)) {
+//       // Delete the file from the uploads folder
+//       fs.unlinkSync(filePath);
+//       res.status(200).json({ message: "Image deleted successfully" });
+//     } else {
+//       res.status(200).json({ error: true, message: "Image not found" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: true, message: error.message });
+//   }
+// });
 
-// Serve static files from the uploads and assets directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/assets", express.static(path.join(__dirname, "assets")));
+// // Serve static files from the uploads and assets directory
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Add Travel Story
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
@@ -246,7 +260,6 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
         .json({ error: true, message: "Travel story not found" });
     }
 
-    // const placeholderImgUrl = `http://localhost:8000/assets/placeholder.png`;
     const placeholderImgUrl = `${process.env.BASE_URL}/assets/placeholder.png`;
 
     travelStory.title = title;
@@ -368,7 +381,7 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
       visitedDate: { $gte: start, $lte: end },
     }).sort({ isFavourite: -1 });
 
-    res.status(200).json({stories: filteredStories});
+    res.status(200).json({ stories: filteredStories });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
   }
@@ -526,11 +539,11 @@ app.get("/find-person", authenticateToken, async (req, res) => {
 
     // Get latest story from this person (for their newest trip photo)
     const latestStory = await TravelStory.findOne({ userId: person._id }).sort({ visitedDate: -1 }).select("_id title visitedLocation visitedDate imageUrl");
-    
+
     // Get a story with common locations if exists (for commonInterests display)
     const commonStory = await TravelStory.findOne({ userId: person._id, visitedLocation: { $in: Array.from(userLocationsSet) } }).select("_id title visitedLocation visitedDate imageUrl");
     const commonInterests = commonStory ? commonStory.visitedLocation.filter((l) => userLocationsSet.has(l)) : [];
-    
+
     // Use latest story for display (has imageUrl), but if none use common story
     const displayStory = latestStory || commonStory;
 
