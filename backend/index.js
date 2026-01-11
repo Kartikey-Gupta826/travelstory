@@ -1,12 +1,12 @@
 require("dotenv").config();
 
-const fs = require("fs");
-const path = require("path");
+// const fs = require("fs");
+// const path = require("path");
 
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
+// const uploadDir = path.join(__dirname, "uploads");
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir);
+// }
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
@@ -148,6 +148,7 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
 
     res.status(200).json({
       imageUrl: result.url,
+      imageFileId: result.fileId,
     });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
@@ -188,9 +189,33 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // app.use("/assets", express.static(path.join(__dirname, "assets")));
 
+app.delete("/delete-image", authenticateToken, async (req, res) => {
+  const { imageFileId } = req.query;
+
+  if (!imageFileId) {
+    return res.status(400).json({
+      error: true,
+      message: "imageFileId is required",
+    });
+  }
+
+  try {
+    await imagekit.deleteFile(imageFileId);
+
+    res.status(200).json({
+      message: "Image deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message: error.message,
+    });
+  }
+});
+
 // Add Travel Story
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
-  const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+  const { title, story, visitedLocation, imageUrl, imageFileId, visitedDate } = req.body;
   const { userId } = req.user;
 
   // Validate required fields
@@ -210,6 +235,7 @@ app.post("/add-travel-story", authenticateToken, async (req, res) => {
       visitedLocation,
       userId,
       imageUrl,
+      imageFileId,
       visitedDate: parsedVisitedDate,
     });
 
@@ -237,7 +263,7 @@ app.get("/get-all-stories", authenticateToken, async (req, res) => {
 // Edit Travel Story
 app.put("/edit-story/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+  const { title, story, visitedLocation, imageUrl, imageFileId, visitedDate } = req.body;
   const { userId } = req.user;
 
   // Validate required fields
@@ -265,7 +291,10 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
     travelStory.title = title;
     travelStory.story = story;
     travelStory.visitedLocation = visitedLocation;
-    travelStory.imageUrl = imageUrl || placeholderImgUrl;
+    if (imageUrl) {
+      travelStory.imageUrl = imageUrl || placeholderImgUrl;;
+      travelStory.imageFileId = imageFileId;
+    }
     travelStory.visitedDate = parsedVisitedDate;
 
     await travelStory.save();
@@ -294,20 +323,20 @@ app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
     await travelStory.deleteOne({ _id: id, userId: userId });
 
     // Extract the filename from the imageUrl
-    const imageUrl = travelStory.imageUrl;
-    const filename = path.basename(imageUrl);
+    // const imageUrl = travelStory.imageUrl;
+    // const filename = path.basename(imageUrl);
 
-    // Define the file path
-    const filePath = path.join(__dirname, "uploads", filename);
+    // // Define the file path
+    // const filePath = path.join(__dirname, "uploads", filename);
 
-    // Delete the image file from the uploads folder
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Failed to delete image file:", err);
-        // Optionally, you could still respond with a success status here
-        // if you don't want to treat this as a critical error.
-      }
-    });
+    // // Delete the image file from the uploads folder
+    // fs.unlink(filePath, (err) => {
+    //   if (err) {
+    //     console.error("Failed to delete image file:", err);
+    //     // Optionally, you could still respond with a success status here
+    //     // if you don't want to treat this as a critical error.
+    //   }
+    // });
 
     res.status(200).json({ message: "Travel story deleted successfully" });
   } catch (error) {

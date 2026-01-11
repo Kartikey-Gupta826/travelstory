@@ -9,6 +9,7 @@ const travelStorySchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   createdOn: { type: Date, default: Date.now },
   imageUrl: { type: String, required: true }, 
+  imageFileId: { type: String },
   visitedDate: { type: Date, required: true }, 
 });
 
