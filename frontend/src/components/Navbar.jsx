@@ -1,11 +1,12 @@
 import React from "react";
 
-import LOGO from "../assets/images/logo.svg";
 import ProfileInfo from "./Cards/ProfileInfo";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "./Input/SearchBar";
 import { MdPersonSearch } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
+
+const LOGO = "/assets/images/logo.svg";
 
 const Navbar = ({ userInfo, searchQuery, setSearchQuery, onSearchNote, handleClearSearch }) => {
   const isToken = localStorage.getItem("token");
