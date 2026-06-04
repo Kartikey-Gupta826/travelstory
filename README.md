@@ -1,3 +1,7 @@
+To login for trial : 
+username : kartikeygupta261204@gmail.com
+password : 123@#
+
 🌍 Travel Story
 
 Travel Story is a full-stack web application that lets users create and manage their travel stories, connect with other travellers, and collaborate in groups.
